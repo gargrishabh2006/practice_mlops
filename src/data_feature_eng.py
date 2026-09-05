@@ -2,7 +2,18 @@ from sklearn.feature_extraction.text import  TfidfVectorizer
 import os
 import logging
 import pandas as pd
+import yaml
 
+def load_param(param_path:str)->dict:
+    try:
+        with open(param_path,"r") as file:
+            params=yaml.safe_load(file)
+            logger.debug("Parametered fetched from %s",param_path)
+            return params
+        
+    except Exception as e:
+        logger.error("Paramete fetching failed")
+        raise
 
 log_dir="logs"
 logger=logging.getLogger("data_feature_eng")
@@ -48,7 +59,10 @@ def tf_idf(max_feature:int,train_data:pd.DataFrame,test_data:pd.DataFrame)->tupl
 
 def main():
     try:
-        tf_features=50
+        params=load_param("params.yaml")
+
+        tf_features=params["feature_engineering"]["max_features"]
+        
         logger.debug("feature engineering started")
 
         train_data_path="./data/precessed/train_preprocessed.csv"

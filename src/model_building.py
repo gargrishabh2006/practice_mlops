@@ -3,6 +3,18 @@ import pandas as pd
 import os
 from sklearn.ensemble import RandomForestClassifier
 import pickle
+import yaml
+
+def load_param(param_path:str)->dict:
+    try:
+        with open(param_path,"r") as file:
+            params=yaml.safe_load(file)
+            logger.debug("Parametered fetched from %s",param_path)
+            return params
+        
+    except Exception as e:
+        logger.error("Paramete fetching failed")
+        raise
 
 log_dir="logs"
 logger=logging.getLogger("model_building")
@@ -51,7 +63,8 @@ def save_model(model,file_path:str)->None:
 
 def main():
     try:
-        params={"n_estimators":50,"random_state":2}
+        params=load_param("params.yaml")
+        params={"n_estimators":params["model_building"]["n_estimators"],"random_state":params["model_building"]["random_state"]}
         train_data= pd.read_csv("./data/feature_engineering/train_FE.csv")
         logger.debug("train_data loaded")
 

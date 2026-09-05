@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import logging
 from sklearn.model_selection import train_test_split
+import yaml
 
 logger=logging.getLogger("data_ingestion")
 logger.setLevel("DEBUG")
@@ -23,6 +24,16 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+def load_param(param_path:str)->dict:
+    try:
+        with open(param_path,"r") as file:
+            params=yaml.safe_load(file)
+            logger.debug("Parametered fetched from %s",param_path)
+            return params
+        
+    except Exception as e:
+        logger.error("Paramete fetching failed")
+        raise
 
 def load_data(url:str)->pd.DataFrame:
     """Load data from link"""
@@ -62,7 +73,9 @@ def preprocess_data(df:pd.DataFrame)->pd.DataFrame:
 
 def main():
     try:
-        test_size=.2
+        params=load_param("params.yaml")
+        test_size=params["data_ingestion"]["test_size"]
+        
         dataset_link="https://raw.githubusercontent.com/vikashishere/Datasets/main/spam.csv"
         df=load_data(dataset_link)
 

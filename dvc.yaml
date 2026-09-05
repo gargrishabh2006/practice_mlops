@@ -4,6 +4,8 @@ stages:
     cmd: python src/data_ingestion.py
     deps:
     - src/data_ingestion.py
+    params:
+    - data_ingestion.test_size
     outs:
     - data/raw
 
@@ -15,6 +17,7 @@ stages:
     outs:
     - data/precessed
 
+
   feature_engineering:
     cmd: python src/data_feature_eng.py
     deps:
@@ -22,6 +25,8 @@ stages:
     - data/precessed
     outs:
     - data/feature_engineering
+    params:
+    - feature_engineering.max_features  
 
   model_building:
     cmd: python src/model_building.py
@@ -30,6 +35,9 @@ stages:
     - data/feature_engineering
     outs:
     - models/models.pkl
+    params:
+    - model_building.n_estimators
+    - model_building.random_state
 
   model_evaluation:
     cmd: python src/model_evaluation.py
@@ -38,3 +46,6 @@ stages:
     - src/model_evaluation.py
     outs:
     - metrics/metrics.json
+
+
+
