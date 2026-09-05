@@ -4,6 +4,10 @@ from sklearn.metrics import accuracy_score,precision_score, recall_score, roc_au
 import pickle
 import json
 import logging
+import yaml
+from dvclive import Live
+
+
 
 log_dir="logs"
 logger=logging.getLogger("model_evaluation")
@@ -23,6 +27,16 @@ console_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
+def load_param(param_path:str)->dict:
+    try:
+        with open(param_path,"r") as file:
+            params=yaml.safe_load(file)
+            logger.debug("Parametered fetched from %s",param_path)
+            return params
+        
+    except Exception as e:
+        logger.error("Paramete fetching failed")
+        raise
 
 def load_model(model_path:str):
     try:
@@ -66,7 +80,7 @@ def metrics_save(metrics:dict,metrics_path:str):
 
 def main():
     try:
-
+        params=load_param("params.yaml")
         test_data_path="./data/feature_engineering/test_FE.csv"
         test_data=pd.read_csv(test_data_path)
         logger.debug("test data loaded")
@@ -77,6 +91,13 @@ def main():
 
         metrics=evaluation(model,test_data)
         logger.debug("metrics evaluated")
+
+        with Live(save_dvc_exp=True) as live:
+            live.log_metric("accuracy",metrics["accuracy"])
+            live.log_metric("precision",metrics["precision"])
+            live.log_metric("recall",metrics["recall"])
+
+            live.log_params(params)
 
         metrics_path="./metrics/metrics.json"
         metrics_save(metrics,metrics_path)
